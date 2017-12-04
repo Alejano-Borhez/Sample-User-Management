@@ -9,8 +9,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * User Service implementation.
@@ -80,5 +85,16 @@ public class UserServiceImpl implements UserService {
         Assert.notNull(userId, "User id should not be null.");
         LOGGER.debug("deleteUser(): user id = {} ", userId);
         return userDao.deleteUser(userId);
+    }
+
+    @Override
+    public Flux<User> getAllUsersFlux() {
+        Future<List<User>> asyncAllUsers = CompletableFuture.supplyAsync(userDao::getAllUsers);
+        try {
+            return Flux.fromIterable(asyncAllUsers.get()).delayElements(Duration.ofSeconds(1L)).log();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return Flux.empty();
+        }
     }
 }

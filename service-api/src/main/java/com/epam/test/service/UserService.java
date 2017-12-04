@@ -2,6 +2,7 @@ package com.epam.test.service;
 
 import com.epam.test.dao.User;
 import org.springframework.dao.DataAccessException;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -52,4 +53,10 @@ public interface UserService {
 
     int deleteUser(Integer userId) throws DataAccessException;
 
+    /**
+     * Used to demonstrated non-blocking capabilities
+     * of Spring 5 web-reactive
+     * @return reactive stream of all users
+     */
+    Flux<User> getAllUsersFlux();
 }
